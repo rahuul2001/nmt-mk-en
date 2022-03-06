@@ -15,8 +15,8 @@ NUM_THREADS=${NUM_THREADS:-8}
 PERL=${PERL:-perl}
 PYTHON=${PYTHON:-python}
 
-SOURCE=corpus.mk
-TARGET=corpus.en
+SOURCE=corpus.kn
+TARGET=corpus.sn
 
 cp $1 $SOURCE
 cp $2 $TARGET
@@ -39,24 +39,24 @@ if [ ! -d "seq2seq" ]; then
 fi
 
 cat $SOURCE | ${PERL} ${MOSES_TOKENIZER} -threads ${NUM_THREADS} -l sk > $SOURCE.tok
-cat $TARGET | ${PERL} ${MOSES_TOKENIZER} -threads ${NUM_THREADS} -l en > $TARGET.tok
+cat $TARGET | ${PERL} ${MOSES_TOKENIZER} -threads ${NUM_THREADS} -l sn > $TARGET.tok
 
 mv $SOURCE.tok $SOURCE
 mv $TARGET.tok $TARGET
 
-${PERL} ${MOSES_CLEAN} corpus mk en "corpus.clean" 1 500
+${PERL} ${MOSES_CLEAN} corpus kn sn "corpus.clean" 1 500
 
-${PYTHON} ${VOCAB_SKRIPT} --max_vocab_size 50000 < corpus.clean.en > vocab.50k.en
-${PYTHON} ${VOCAB_SKRIPT} --max_vocab_size 50000 < corpus.clean.mk > vocab.50k.mk
+${PYTHON} ${VOCAB_SKRIPT} --max_vocab_size 50000 < corpus.clean.sn > vocab.50k.sn
+${PYTHON} ${VOCAB_SKRIPT} --max_vocab_size 50000 < corpus.clean.kn > vocab.50k.kn
 
 # Learn Shared BPE
 for merge_ops in 32000; do
   echo "Learning BPE with merge_ops=${merge_ops}. This may take a while..."
-  cat "corpus.clean.mk" "corpus.clean.en" | \
+  cat "corpus.clean.kn" "corpus.clean.sn" | \
     ${PYTHON} ${LEARN_BPE_SKRIPT} -s $merge_ops > "bpe.${merge_ops}"
 
   echo "Apply BPE with merge_ops=${merge_ops} to tokenized files..."
-  for lang in en mk; do
+  for lang in sn kn; do
     for f in "corpus.${lang}" "corpus.clean.${lang}"; do
       outfile="${f%.*}.bpe.${merge_ops}.${lang}"
       ${PYTHON} ${APPLY_BPE_SKRIPT} -c "bpe.${merge_ops}" < $f > "${outfile}"
@@ -65,6 +65,6 @@ for merge_ops in 32000; do
   done
 
   # Create vocabulary file for BPE
-  cat "corpus.clean.bpe.32000.en" "corpus.clean.bpe.32000.mk" | \
+  cat "corpus.clean.bpe.32000.sn" "corpus.clean.bpe.32000.kn" | \
     ${PYTHON} ${GET_VOCAB_SKRIP} | cut -f1 -d ' ' > "vocab.bpe.${merge_ops}"
 done
