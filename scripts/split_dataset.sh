@@ -9,14 +9,15 @@ dev_test_number=$(($DEV_NUMBER+$TEST_NUMBER))
 
 TRAIN_NUMBER=$(($LINES_NUMBER-$dev_test_number))
 
-TRAIN_SOURCE=train.mk
-TRAIN_TARGET=train.en
+TRAIN_SOURCE=train.kn
+TRAIN_TARGET=train.sn
 
-DEV_SOURCE=test.mk
-DEV_TARGET=test.en
+DEV_SOURCE=test.kn
+DEV_TARGET=test.sn
 
-TEST_SOURCE=dev.mk
-TEST_TARGET=dev.en
+TEST_SOURCE=dev.kn
+TEST_TARGET=dev.sn
+
 
 SOURCE=$1
 TARGET=$2
